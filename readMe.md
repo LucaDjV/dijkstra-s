@@ -1,1 +1,1 @@
-this is a private repo for dijstra's algorithm so I can access my files from the cloud
+this is a private repo for dijstra's algorithm so I can access my files from the cloud. it doesnt work yet btw
