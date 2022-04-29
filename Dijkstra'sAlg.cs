@@ -9,20 +9,24 @@ namespace djikstraAlg
         static void Main(string[] args)
         {
             int[,] adjacencyMat = {
-                { 0, 6, 9, 10, 0},
-                { 6, 0, 13, 3, 10},
-                { 9, 13, 0, 5, 8},
-                { 10, 3, 5, 0, 0},
-                { 0, 10, 8, 0, 0},
+                { 0, 6, 8, 10, 0},
+                { 6, 0, 5, 0, 10},
+                { 8, 5, 0, 5, 9},
+                { 10, 0, 5, 0, 6},
+                { 0, 10, 9, 6, 0},
             }; //initialise an adjacency matrix to represent a graph
             dim = adjacencyMat.GetLength(0);
-            Queue<label> queue = forwardPass(adjacencyMat);
+            Queue<label> myQueue = forwardPass(adjacencyMat);
+            PrintQueue(myQueue, adjacencyMat);
+            Console.ReadKey();
+        }
+        static void PrintQueue(Queue<label> queue, int[,] adjacencyMat)
+        {
             for (int i = 0; i < queue.Count; i++)
             {
                 label temp = queue.Dequeue();
                 Console.WriteLine(temp.node + "has distance: " + temp.tempDist);
             }
-            Console.ReadKey();
         }
         static Dictionary<int, int> CreateDict(int[,] adjacencyMat)
         {
@@ -47,7 +51,7 @@ namespace djikstraAlg
                     }
                     if (tempLabels[j] <= temp) //now that we have the new distance we can check if its the minimum edge connected to the node now rather than waiting until after
                     {
-                        tempNode = j;
+                        tempNode = j + 1;
                         temp = tempLabels[j]; //if it is the minimum, the minimum edge is changed to it
                     }
                 }
@@ -65,12 +69,12 @@ namespace djikstraAlg
             {
                 int temp = int.MaxValue; //making a maximum
                 int tempNode = 0; //giving the maximum a node
-                bool throughLoop = false; 
+                bool throughLoop = false;
                 for (int i = 0; i < layersToCheck.Count; i++) //loops through all of the layers to check that increases with each new node added
                 {
                     for (int j = 0; j < dim; j++) //loops through all of the values in the layer
                     {
-                        checkVal(ref temp, ref tempNode, adjacencyMat, tempLabels, layersToCheck, i, j);
+                        checkVal(ref temp, ref tempNode, adjacencyMat, tempLabels, layersToCheck, i, j); //abstracting checking to a function
                     }
                     throughLoop = true;
                 }
@@ -106,4 +110,55 @@ namespace djikstraAlg
             tempDist = tempDistIn;
         }
     }
+    class PriorityQueue
+    {
+        struct priorityInt //structure for the items
+        {
+            public int Value;
+            public int Priority;
+            public priorityInt(int ValueIn, int PriorityIn)
+            {
+                Value = ValueIn;
+                Priority = PriorityIn;
+            }
+        }
+        int rear;
+        int front;
+        public int length;
+        priorityInt[] contents; //array of structures to store items
+        int itemCount;
+        public PriorityQueue(int size)
+        {
+            contents = new priorityInt[size];
+            rear = 0;
+            front = 0;
+            length = size;
+            itemCount = 0;
+        }
+        public void Enqueue(int input, int priority)
+        {
+            rear++;
+            itemCount++;
+            contents[rear] = new priorityInt(input, priority);
+            int numsToChange = contents.Length;
+            while (numsToChange > 1)
+            {
+                for (int i = numsToChange; i < 0; i--)
+                {
+                    if (contents[i + 1].Priority > contents[i].Priority)
+                    {
+                        int temp = contents[i + 1].Priority;
+                        int tempVal = contents[i + 1].Value;
+                        contents[i + 1].Priority = contents[i].Priority;
+                        contents[i + 1].Value = contents[i].Value;
+                        contents[i].Priority = temp;
+                        contents[i].Value = tempVal;
+                        Console.WriteLine(contents[i + 1] + " " + temp);
+                    }
+                }
+                numsToChange--;
+            }
+        }
+    }
+
 }
