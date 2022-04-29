@@ -110,55 +110,60 @@ namespace djikstraAlg
             tempDist = tempDistIn;
         }
     }
-    class PriorityQueue
+    public struct priorityItem //structure for the items
     {
-        struct priorityInt //structure for the items
+        public int Value;
+        public int Priority;
+        public priorityItem(int ValueIn, int PriorityIn)
         {
-            public int Value;
-            public int Priority;
-            public priorityInt(int ValueIn, int PriorityIn)
-            {
-                Value = ValueIn;
-                Priority = PriorityIn;
-            }
+            Value = ValueIn;
+            Priority = PriorityIn;
         }
+    }
+    public class PriorityQueue
+    {
         int rear;
         int front;
-        public int length;
-        priorityInt[] contents; //array of structures to store items
+        priorityItem[] contents; //array of structures to store items
         int itemCount;
         public PriorityQueue(int size)
         {
-            contents = new priorityInt[size];
-            rear = 0;
+            contents = new priorityItem[size];
+            rear = -1;
             front = 0;
-            length = size;
             itemCount = 0;
+        }
+        public priorityItem Peek()
+        {
+            if (itemCount == 0) { throw new Exception("no items in queue"); }
+            return contents[front];
         }
         public void Enqueue(int input, int priority)
         {
             rear++;
             itemCount++;
-            contents[rear] = new priorityInt(input, priority);
-            int numsToChange = contents.Length;
-            while (numsToChange > 1)
+            contents[rear] = new priorityItem(input, priority);
+            int numsToChange = itemCount;
+            while (numsToChange > 0)
             {
-                for (int i = numsToChange; i < 0; i--)
+                for (int i = front + numsToChange - 1; i > 0; i--)
                 {
-                    if (contents[i + 1].Priority > contents[i].Priority)
+                    if (contents[i].Priority < contents[i - 1].Priority)
                     {
-                        int temp = contents[i + 1].Priority;
-                        int tempVal = contents[i + 1].Value;
-                        contents[i + 1].Priority = contents[i].Priority;
-                        contents[i + 1].Value = contents[i].Value;
-                        contents[i].Priority = temp;
-                        contents[i].Value = tempVal;
-                        Console.WriteLine(contents[i + 1] + " " + temp);
+                        priorityItem temp = contents[i];
+                        contents[i] = contents[i - 1];
+                        contents[i - 1] = temp;
                     }
                 }
                 numsToChange--;
             }
         }
+        public priorityItem Dequeue()
+        {
+            if (itemCount == 0) { throw new Exception("no items in queue"); }
+            front++;
+            itemCount--;
+            return contents[front - 1];
+        }
     }
-
 }
