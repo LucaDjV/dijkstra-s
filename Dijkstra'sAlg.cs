@@ -42,16 +42,46 @@ namespace djikstraAlg
 
             //enqueues the 1st node
             labels.Enqueue(1, 0);
+            priorityItem tempOut = labels.Dequeue();
+            visited.Add(tempOut.Node);
+
+            //changes the integer value to a UTF capital letter
+            char keyOut = (char)(65 + tempOut.Node);
+            result.Add(keyOut, tempOut.Priority);
+            for (int i = 1; i < adjacencyMat.GetLength(1); i++)
+            {
+                //conditional to check if there is a connection and
+                //if the minimum distance has not already been found
+                int currentNode = adjacencyMat[tempOut.Node, i];
+                if (currentNode != 0 && !visited.Contains(i))
+                {
+                    //checking if the node is already in the label queue
+                    if (labels.Contains(i))
+                    {
+                        //if the new distance is less than the old one
+                        if (tempOut.Priority + currentNode < labels.GetPriority(i))
+                        {
+                            //changing the distance to the new, shorter distance
+                            labels.changePriority(i, tempOut.Priority + currentNode);
+                        }
+                    }
+                    else
+                    {
+                        //adding the new node and distance to the queue
+                        labels.Enqueue(i, tempOut.Priority + currentNode);
+                    }
+                }
+            }
 
             //loops until there are no more nodes to check
-            while(labels.GetLength() > 0)
+            while (labels.GetLength() > 0)
             {
                 //dequeues the item with the shortest distance and
                 //adds it to the visited list and distance dictionary
                 priorityItem temp = labels.Dequeue();
-                visited.Add(temp.Value);
+                visited.Add(temp.Node);
                 //changes the integer value to a UTF capital letter
-                char key = (char)(65 + temp.Value);
+                char key = (char)(65 + temp.Node);
                 result.Add(key, temp.Priority);
 
                 //loops through the child nodes of the node we just dequeued
@@ -59,22 +89,30 @@ namespace djikstraAlg
                 {
                     //conditional to check if there is a connection and
                     //if the minimum distance has not already been found
-                    if(adjacencyMat[temp.Value, i] != 0 && !visited.Contains(i))
+                    int currentNode = adjacencyMat[temp.Node, i];
+                    bool visitedBool = visited.Contains(i);
+                    if (currentNode != 0 && !visitedBool)
                     {
                         //checking if the node is already in the label queue
                         if (labels.Contains(i))
                         {
                             //if the new distance is less than the old one
-                            if(temp.Priority + adjacencyMat[temp.Value, i] < labels.GetPriority(i))
+                            if(temp.Priority + currentNode < labels.GetPriority(i))
                             {
-                                //changing the distance to the new, shorter distance
-                                labels.changePriority(i, temp.Priority + adjacencyMat[temp.Value, i]);
+                                if(currentNode != 0)
+                                {
+                                    //changing the distance to the new, shorter distance
+                                    labels.changePriority(i, temp.Priority + currentNode);
+                                }
                             }
                         }
                         else
                         {
-                            //adding the new node and distance to the queue
-                            labels.Enqueue(i, temp.Priority + adjacencyMat[temp.Value, i]);
+                            if (currentNode != 0)
+                            {
+                                //adding the new node and distance to the queue
+                                labels.Enqueue(i, temp.Priority + currentNode);
+                            }
                         }
                     }
                 }
@@ -84,11 +122,11 @@ namespace djikstraAlg
     }
     public struct priorityItem //structure for the items
     {
-        public int Value;
+        public int Node;
         public int Priority;
         public priorityItem(int ValueIn, int PriorityIn)
         {
-            Value = ValueIn;
+            Node = ValueIn;
             Priority = PriorityIn;
         }
     }
@@ -131,7 +169,7 @@ namespace djikstraAlg
         {
             for(int i = front; i <= rear; i++)
             {
-                if(contents[i].Value == item)
+                if(contents[i].Node == item)
                 {
                     return true;
                 }
