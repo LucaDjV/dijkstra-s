@@ -21,6 +21,7 @@ namespace djikstraAlg
             {
                 Console.WriteLine("node " + s.Key + " has distance from A of " + s.Value);
             }
+            Console.ReadKey();
         }
     }
     class dijkstra
@@ -145,62 +146,6 @@ namespace djikstraAlg
         public int GetLength()
         {
             return itemCount;
-        }
-        public void Enqueue(int input, int priority)
-        {
-            rear++;
-            itemCount++;
-            contents[rear] = new priorityItem(input, priority);
-            int numsToChange = itemCount;
-            while (numsToChange > 0)
-            {
-                for (int i = front + numsToChange - 1; i > 0; i--)
-                {
-                    if (contents[i].Priority < contents[i - 1].Priority)
-                    {
-                        priorityItem temp = contents[i];
-                        contents[i] = contents[i - 1];
-                        contents[i - 1] = temp;
-                    }
-                }
-                numsToChange--;
-            }
-        }
-        public priorityItem Dequeue()
-        {
-            if (itemCount == 0) { throw new Exception("no items in queue"); }
-            front++;
-            itemCount--;
-            return contents[front - 1];
-        }
-    }
-    public struct priorityItem //structure for the items
-    {
-        public int Value;
-        public int Priority;
-        public priorityItem(int ValueIn, int PriorityIn)
-        {
-            Value = ValueIn;
-            Priority = PriorityIn;
-        }
-    }
-    public class PriorityQueue
-    {
-        int rear;
-        int front;
-        priorityItem[] contents; //array of structures to store items
-        int itemCount;
-        public PriorityQueue(int size)
-        {
-            contents = new priorityItem[size];
-            rear = -1;
-            front = 0;
-            itemCount = 0;
-        }
-        public priorityItem Peek()
-        {
-            if (itemCount == 0) { throw new Exception("no items in queue"); }
-            return contents[front];
         }
         public void Enqueue(int input, int priority)
         {
