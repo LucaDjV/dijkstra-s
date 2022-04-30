@@ -9,101 +9,170 @@ namespace djikstraAlg
         static void Main(string[] args)
         {
             int[,] adjacencyMat = {
-                { 0, 6, 9, 10, 0},
-                { 6, 0, 13, 3, 10},
-                { 9, 13, 0, 5, 8},
-                { 10, 3, 5, 0, 0},
-                { 0, 10, 8, 0, 0},
+                { 0, 6, 8, 10, 0},
+                { 6, 0, 5, 0, 10},
+                { 8, 5, 0, 5, 9},
+                { 10, 0, 5, 0, 6},
+                { 0, 10, 9, 6, 0},
             }; //initialise an adjacency matrix to represent a graph
             dim = adjacencyMat.GetLength(0);
-            Queue<label> queue = forwardPass(adjacencyMat);
-            for (int i = 0; i < queue.Count; i++)
+            Dictionary<char, int> distances = dijkstra.forwardPass(adjacencyMat);
+            foreach(var s in distances)
             {
-                label temp = queue.Dequeue();
-                Console.WriteLine(temp.node + "has distance: " + temp.tempDist);
+                Console.WriteLine("node " + s.Key + " has distance from A of " + s.Value);
             }
             Console.ReadKey();
         }
-        static Dictionary<int, int> CreateDict(int[,] adjacencyMat)
+    }
+    class dijkstra
+    {
+        public static Dictionary<char, int> forwardPass(int[,] adjacencyMat)
         {
-            Dictionary<int, int> tempLabels = new Dictionary<int, int>(); //instatiate a dictionary of labels to store the labels that have not been chosen yet
-            for (int i = 0; i < dim; i++)
+            //creates a priority queue to store the distance
+            //values of each node in order while they are
+            //still in the process of being found
+            PriorityQueue labels = new PriorityQueue(adjacencyMat.GetLength(0)+10);
+
+            //creates a dictionary to pass the node and
+            //distance values to return
+            Dictionary<char, int> result = new Dictionary<char,int>();
+
+            //creates a list of visited nodes
+            List<int> visited = new List<int> ();
+
+            //enqueues the 1st node
+            labels.Enqueue(1, 0);
+
+            //loops until there are no more nodes to check
+            while(labels.GetLength() > 0)
             {
-                tempLabels.Add(i + 1, adjacencyMat[0, i]);
-            }//adds all of the nodes to the dictionary
-            tempLabels.Remove(0);
-            return tempLabels;
-        }
-        static void checkVal(ref int temp, ref int tempNode, int[,] adjacencyMat, Dictionary<int, int> tempLabels, List<int> layersToCheck, int i, int j)
-        {
-            if (adjacencyMat[i, j] != 0) //ensures the edge is not null
-            {
-                if (tempLabels.ContainsKey(j))// ensures the label is contained in the dict before calling it
+                //dequeues the item with the shortest distance and
+                //adds it to the visited list and distance dictionary
+                priorityItem temp = labels.Dequeue();
+                visited.Add(temp.Value);
+                //changes the integer value to a UTF capital letter
+                char key = (char)(65 + temp.Value);
+                result.Add(key, temp.Priority);
+
+                //loops through the child nodes of the node we just dequeued
+                for(int i = 0; i < adjacencyMat.GetLength(1); i++)
                 {
-                    /*Console.WriteLine("\t" + tempLabels[j]);*/
-                    if (adjacencyMat[layersToCheck[i], j] < tempLabels[j])//checks if the weight at (current layer , current node) is less than the temporary label for the current node
+                    //conditional to check if there is a connection and
+                    //if the minimum distance has not already been found
+                    if(adjacencyMat[temp.Value, i] != 0 && !visited.Contains(i))
                     {
-                        tempLabels[j] = adjacencyMat[layersToCheck[i], j]; //if the weight is less, it changs the temporary label's weight to it
-                    }
-                    if (tempLabels[j] <= temp) //now that we have the new distance we can check if its the minimum edge connected to the node now rather than waiting until after
-                    {
-                        tempNode = j;
-                        temp = tempLabels[j]; //if it is the minimum, the minimum edge is changed to it
+                        //checking if the node is already in the label queue
+                        if (labels.Contains(i))
+                        {
+                            //if the new distance is less than the old one
+                            if(temp.Priority + adjacencyMat[temp.Value, i] < labels.GetPriority(i))
+                            {
+                                //changing the distance to the new, shorter distance
+                                labels.changePriority(i, temp.Priority + adjacencyMat[temp.Value, i]);
+                            }
+                        }
+                        else
+                        {
+                            //adding the new node and distance to the queue
+                            labels.Enqueue(i, temp.Priority + adjacencyMat[temp.Value, i]);
+                        }
                     }
                 }
             }
-        }
-        static Queue<label> forwardPass(int[,] adjacencyMat) //take in an adjacency matrix representing the graph
-        {
-            Queue<label> labels = new Queue<label>(); //initialise a queue of labels to store the labels in the order in which they are added
-            label startNode = new label(1, 0); labels.Enqueue(startNode);//enque the start node for ease
-            Dictionary<int, int> tempLabels = CreateDict(adjacencyMat);
-            List<int> layersToCheck = new List<int>();
-            layersToCheck.Add(0);
-            int counter = tempLabels.Count;
-            while (counter > 1) //loops until the amount of labels left to add to the list is 0
-            {
-                int temp = int.MaxValue; //making a maximum
-                int tempNode = 0; //giving the maximum a node
-                bool throughLoop = false; 
-                for (int i = 0; i < layersToCheck.Count; i++) //loops through all of the layers to check that increases with each new node added
-                {
-                    for (int j = 0; j < dim; j++) //loops through all of the values in the layer
-                    {
-                        checkVal(ref temp, ref tempNode, adjacencyMat, tempLabels, layersToCheck, i, j);
-                    }
-                    throughLoop = true;
-                }
-                if (throughLoop)
-                {
-                    Console.WriteLine();
-                    layersToCheck.Add(tempNode);
-                    label finalTemp = new label(tempNode, temp);
-                    labels.Enqueue(finalTemp);
-                    /*Console.WriteLine("labels dict: ");
-                    foreach (var l in tempLabels)
-                    {
-                        Console.WriteLine("node: " + l.Key + " dist: " + l.Value);
-                    }*/
-                    tempLabels.Remove(tempNode);
-                    for (int i = 0; i < dim; i++)
-                    {
-                        adjacencyMat[i, tempNode] = int.MaxValue;
-                    }
-                }
-                counter--;
-            }
-            return labels;
+            return result;
         }
     }
-    class label
+    public struct priorityItem //structure for the items
     {
-        public int node;
-        public int tempDist;
-        public label(int nodeIn, int tempDistIn)
+        public int Value;
+        public int Priority;
+        public priorityItem(int ValueIn, int PriorityIn)
         {
-            node = nodeIn;
-            tempDist = tempDistIn;
+            Value = ValueIn;
+            Priority = PriorityIn;
+        }
+    }
+    public class PriorityQueue
+    {
+        int rear;
+        int front;
+        priorityItem[] contents; //array of structures to store items
+        int itemCount;
+        public PriorityQueue(int size)
+        {
+            contents = new priorityItem[size];
+            rear = -1;
+            front = 0;
+            itemCount = 0;
+        }
+        public int GetPriority(int item)
+        {
+            return contents[item].Priority;
+        }
+        public void changePriority(int item, int newPriority)
+        {
+            contents[item].Priority = newPriority;
+            int numsToChange = itemCount;
+            while (numsToChange > 0)
+            {
+                for (int i = front + numsToChange - 1; i > 0; i--)
+                {
+                    if (contents[i].Priority < contents[i - 1].Priority)
+                    {
+                        priorityItem temp = contents[i];
+                        contents[i] = contents[i - 1];
+                        contents[i - 1] = temp;
+                    }
+                }
+                numsToChange--;
+            }
+        }
+        public bool Contains(int item)
+        {
+            for(int i = front; i <= rear; i++)
+            {
+                if(contents[i].Value == item)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public priorityItem Peek()
+        {
+            if (itemCount == 0) { throw new Exception("no items in queue"); }
+            return contents[front];
+        }
+        public int GetLength()
+        {
+            return itemCount;
+        }
+        public void Enqueue(int input, int priority)
+        {
+            rear++;
+            itemCount++;
+            contents[rear] = new priorityItem(input, priority);
+            int numsToChange = itemCount;
+            while (numsToChange > 0)
+            {
+                for (int i = front + numsToChange - 1; i > 0; i--)
+                {
+                    if (contents[i].Priority < contents[i - 1].Priority)
+                    {
+                        priorityItem temp = contents[i];
+                        contents[i] = contents[i - 1];
+                        contents[i - 1] = temp;
+                    }
+                }
+                numsToChange--;
+            }
+        }
+        public priorityItem Dequeue()
+        {
+            if (itemCount == 0) { throw new Exception("no items in queue"); }
+            front++;
+            itemCount--;
+            return contents[front - 1];
         }
     }
 }
