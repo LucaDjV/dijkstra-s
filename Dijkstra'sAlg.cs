@@ -17,7 +17,7 @@ namespace djikstraAlg
             }; //initialise an adjacency matrix to represent a graph
             dim = adjacencyMat.GetLength(0);
             Dictionary<char, int> distances = dijkstra.forwardPass(adjacencyMat);
-            foreach(var s in distances)
+            foreach (var s in distances)
             {
                 Console.WriteLine("node " + s.Key + " has distance from A of " + s.Value);
             }
@@ -31,17 +31,17 @@ namespace djikstraAlg
             //creates a priority queue to store the distance
             //values of each node in order while they are
             //still in the process of being found
-            PriorityQueue labels = new PriorityQueue(adjacencyMat.GetLength(0)+10);
+            PriorityQueue labels = new PriorityQueue(adjacencyMat.GetLength(0) + 10);
 
             //creates a dictionary to pass the node and
             //distance values to return
-            Dictionary<char, int> result = new Dictionary<char,int>();
+            Dictionary<char, int> result = new Dictionary<char, int>();
 
             //creates a list of visited nodes
-            List<int> visited = new List<int> ();
+            List<int> visited = new List<int>();
 
             //enqueues the 1st node
-            labels.Enqueue(1, 0);
+            labels.Enqueue(0, 0);
             priorityItem tempOut = labels.Dequeue();
             visited.Add(tempOut.Node);
 
@@ -85,7 +85,7 @@ namespace djikstraAlg
                 result.Add(key, temp.Priority);
 
                 //loops through the child nodes of the node we just dequeued
-                for(int i = 0; i < adjacencyMat.GetLength(1); i++)
+                for (int i = 0; i < adjacencyMat.GetLength(1); i++)
                 {
                     //conditional to check if there is a connection and
                     //if the minimum distance has not already been found
@@ -97,9 +97,9 @@ namespace djikstraAlg
                         if (labels.Contains(i))
                         {
                             //if the new distance is less than the old one
-                            if(temp.Priority + currentNode < labels.GetPriority(i))
+                            if (temp.Priority + currentNode < labels.GetPriority(i))
                             {
-                                if(currentNode != 0)
+                                if (currentNode != 0)
                                 {
                                     //changing the distance to the new, shorter distance
                                     labels.changePriority(i, temp.Priority + currentNode);
@@ -167,9 +167,9 @@ namespace djikstraAlg
         }
         public bool Contains(int item)
         {
-            for(int i = front; i <= rear; i++)
+            for (int i = front; i <= rear; i++)
             {
-                if(contents[i].Node == item)
+                if (contents[i].Node == item)
                 {
                     return true;
                 }
